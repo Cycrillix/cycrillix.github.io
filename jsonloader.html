@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Display a map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      #map {position: absolute; top: 0; right: 0; bottom: 0; left: 0;}
+    </style>
+  </head>
+  <body>
+    <div id="map">
+      <a href="https://www.maptiler.com" style="position:absolute;left:10px;bottom:10px;z-index:999;"><img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo"></a>
+    </div>
+    <p><a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a></p>
+    <script>
+      const key = 'iYjfmzXA4pqoCg4AY9DA';
+      const map = L.map('map').setView([49.2125578, 16.62662018], 14); //starting position
+      L.tileLayer(`https://api.maptiler.com/tiles/a249e66a-ce49-461a-b3fe-9962eb835556/{z}/{x}/{y}.png?key=${key}`,{ //style URL
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+      }).addTo(map);
+
+      const leafIcon = new L.icon({
+        iconUrl: 'https://cdn.discordapp.com/attachments/613409785521373185/1253091554588102846/UmsuFusiliers.png?ex=667497f3&is=66734673&hm=7ade6f160b13f059b352c2f2d76a6465e139c8cb98238ac5193349140cef3e0f&',
+        iconSize: [100, 50],
+        iconAnchor: [50, 25],
+      });
+
+      async function loadGeoJSON() {
+        const response = await fetch(`https://api.maptiler.com/data/8af52467-4278-4524-acc6-9851a67dbf1a/features.json?key=${key}`);
+        const geoJSON = await response.json();
+        L.geoJSON(geoJSON, {
+          pointToLayer: function (geoJsonPoint, latlng) {
+            // Create a marker with the custom icon
+            const marker = L.marker(latlng, { icon: leafIcon });
+
+            // Get the GeoJSON feature properties
+            const properties = geoJsonPoint.properties;
+
+            // Create a popup with the "name" property
+            const popupContent = "<b>" + properties.name + "</b><br> Manpower: " + properties.manpower;
+            marker.bindPopup(popupContent);
+
+            // Return the marker
+            return marker;
+          }
+        }).addTo(map);
+      }
+
+      loadGeoJSON();
+
+    </script>
+  </body>
+</html>
